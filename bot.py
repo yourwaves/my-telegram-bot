@@ -7,8 +7,10 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-TOKEN = "8794732962:AAF8kdYASvD6SivNqAQZ-r4gEIzyQcn6DQk"
-GROUP_ID = -5158937031
+import os
+
+TOKEN = os.getenv("TOKEN")
+GROUP_ID = int(os.getenv("GROUP_ID"))
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
