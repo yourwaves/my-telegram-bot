@@ -85,7 +85,8 @@ async def service_amount(msg: types.Message, state: FSMContext):
     await state.update_data(service_amount=amount)
 
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.add("Кэш", "Банк")
+    kb.add("Cash", "Bank")
+    kb.add("Merchant")
     kb.add("❌ Отмена")
 
     await msg.answer("Тип оплаты:", reply_markup=kb)
@@ -116,7 +117,8 @@ async def has_cream(msg: types.Message, state: FSMContext):
         await state.update_data(has_cream=True)
 
         kb = ReplyKeyboardMarkup(resize_keyboard=True)
-        kb.add("Кэш", "Банк")
+        kb.add("Cash", "Bank")
+        kb.add("Merchant")
         kb.add("❌ Отмена")
 
         await msg.answer("Крем = 10€\nТип оплаты:", reply_markup=kb)
