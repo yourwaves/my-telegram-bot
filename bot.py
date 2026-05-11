@@ -164,11 +164,21 @@ async def finish(msg, state: FSMContext):
 
     if has_service:
         text_user += f"💉 Услуга:\n💰 {service_amount}\n"
-        text_user += f"{'💵 Кэш' if data['service_payment']=='Кэш' else '💳 Банк'}\n"
+        if data['service_payment'] == 'Кэш':
+           text_user += "💵 Кэш\n"
+        elif data['service_payment'] == 'Merchant':
+             text_user += "📲 Merchant\n"
+        else:
+             text_user += "💳 Банк\n"
 
     if has_cream:
         text_user += "\n🧴 Крем:\n💰 10\n"
-        text_user += f"{'💵 Кэш' if data['cream_payment']=='Кэш' else '💳 Банк'}\n"
+        if data['cream_payment'] == 'Кэш':
+            text_user += "💵 Кэш\n"
+        elif data['cream_payment'] == 'Merchant':
+               text_user += "📲 Merchant\n"
+        else:
+             text_user += "💳 Банк\n"
 
     # 📊 ТЕКСТ ДЛЯ ГРУППЫ (С ПРОЦЕНТАМИ)
     text_group = text_user + f"\n📊\n👤 Мастер: {round(master_income,2)}\n🏢 Компания: {round(company_total,2)}"
