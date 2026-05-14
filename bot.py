@@ -23,6 +23,8 @@ class Form(StatesGroup):
     service_payment = State()
     has_cream = State()
     cream_payment = State()
+    ask_note = State()
+    note = State()
     confirm = State()
 
 
@@ -186,14 +188,71 @@ async def finish(msg, state: FSMContext):
     # сохраняем именно групповой текст
     await state.update_data(final_text=text_group)
 
+    await state.update_data(
+        text_user=text_user,
+        text_group=text_group
+    )
+
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     kb.add("✅ Да", "❌ Нет")
 
-    # показываем мастеру БЕЗ процентов
-    await msg.answer(f"Проверь:\n\n{text_user}\n\nОтправить?", reply_markup=kb)
+    await msg.answer("📝 Оставить заметку?", reply_markup=kb)
+
+    await Form.ask_note.set()
+
+@dp.message_handler(state=Form.ask_note)
+async def ask_note_handler(msg: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+
+    if msg.text == "✅ Да":
+
+        await msg.answer(
+            "📝 Введите заметку:",
+            reply_markup=ReplyKeyboardRemove()
+        )
+
+        await Form.note.set()
+
+    else:
+
+        kb = ReplyKeyboardMarkup(resize_keyboard=True)
+        kb.add("✅ Да", "❌ Нет")
+
+        await msg.answer(
+            f"Проверь:\n\n{data['text_user']}\n\nОтправить?",
+            reply_markup=kb
+        )
+
+        await Form.confirm.set()
+        
+@dp.message_handler(state=Form.note)
+async def note_handler(msg: types.Message, state: FSMContext):
+
+    note = msg.text
+
+    data = await state.get_data()
+
+    text_user = data["text_user"]
+    text_group = data["text_group"]
+
+    text_user += f"\n📝 Заметка:\n{note}\n"
+    text_group += f"\n📝 Заметка:\n{note}\n"
+
+    await state.update_data(
+        text_user=text_user,
+        final_text=text_group
+    )
+
+    kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    kb.add("✅ Да", "❌ Нет")
+
+    await msg.answer(
+        f"Проверь:\n\n{text_user}\n\nОтправить?",
+        reply_markup=kb
+    )
 
     await Form.confirm.set()
-
 
 # ✅ ПОДТВЕРЖДЕНИЕ
 @dp.message_handler(state=Form.confirm)
