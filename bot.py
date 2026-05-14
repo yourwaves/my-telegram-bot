@@ -87,8 +87,8 @@ async def service_amount(msg: types.Message, state: FSMContext):
     await state.update_data(service_amount=amount)
 
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.add("Cash", "Bank")
-    kb.add("Merchant")
+    kb.add("💵 Cash", "💳 Bank")
+    kb.add("📲 Merchant")
     kb.add("❌ Отмена")
 
     await msg.answer("Тип оплаты:", reply_markup=kb)
@@ -119,8 +119,8 @@ async def has_cream(msg: types.Message, state: FSMContext):
         await state.update_data(has_cream=True)
 
         kb = ReplyKeyboardMarkup(resize_keyboard=True)
-        kb.add("Cash", "Bank")
-        kb.add("Merchant")
+        kb.add("💵 Cash", "💳 Bank")
+        kb.add("📲 Merchant")
         kb.add("❌ Отмена")
 
         await msg.answer("Крем = 10€\nТип оплаты:", reply_markup=kb)
@@ -200,6 +200,7 @@ async def finish(msg, state: FSMContext):
 
     await Form.ask_note.set()
 
+
 @dp.message_handler(state=Form.ask_note)
 async def ask_note_handler(msg: types.Message, state: FSMContext):
 
@@ -225,7 +226,8 @@ async def ask_note_handler(msg: types.Message, state: FSMContext):
         )
 
         await Form.confirm.set()
-        
+
+
 @dp.message_handler(state=Form.note)
 async def note_handler(msg: types.Message, state: FSMContext):
 
@@ -253,6 +255,7 @@ async def note_handler(msg: types.Message, state: FSMContext):
     )
 
     await Form.confirm.set()
+
 
 # ✅ ПОДТВЕРЖДЕНИЕ
 @dp.message_handler(state=Form.confirm)
