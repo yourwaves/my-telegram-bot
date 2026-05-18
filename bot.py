@@ -98,7 +98,14 @@ async def service_amount(msg: types.Message, state: FSMContext):
 # 💳 ОПЛАТА УСЛУГИ
 @dp.message_handler(state=Form.service_payment)
 async def service_payment(msg: types.Message, state: FSMContext):
-    await state.update_data(service_payment=msg.text)
+    payment = (
+    msg.text
+    .replace("💵 ", "")
+    .replace("💳 ", "")
+    .replace("📲 ", "")
+)
+
+await state.update_data(service_payment=payment)
     await ask_cream(msg)
 
 
@@ -133,7 +140,14 @@ async def has_cream(msg: types.Message, state: FSMContext):
 # 💳 ОПЛАТА КРЕМА
 @dp.message_handler(state=Form.cream_payment)
 async def cream_payment(msg: types.Message, state: FSMContext):
-    await state.update_data(cream_payment=msg.text)
+    payment = (
+    msg.text
+    .replace("💵 ", "")
+    .replace("💳 ", "")
+    .replace("📲 ", "")
+)
+
+await state.update_data(cream_payment=payment)
     await finish(msg, state)
 
 
