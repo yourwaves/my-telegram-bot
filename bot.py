@@ -183,7 +183,7 @@ async def finish(msg, state: FSMContext):
              text_user += "💳 Bank\n"
 
     # 📊 ТЕКСТ ДЛЯ ГРУППЫ (С ПРОЦЕНТАМИ)
-    text_group = text_user + f"\n📊\n👤 Мастер: {round(master_income,2)}\n🏢 Компания: {round(company_total,2)}"
+    text_group = f"{text_user}\n📊\n👤 Мастер: {round(master_income,2)}\n🏢 Компания: {round(company_total,2)}"
 
     # сохраняем именно групповой текст
     await state.update_data(final_text=text_group)
