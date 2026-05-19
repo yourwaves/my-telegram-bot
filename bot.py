@@ -6,7 +6,6 @@ from aiogram.utils import executor
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-
 import os
 
 TOKEN = os.getenv("TOKEN")
@@ -28,59 +27,86 @@ class Form(StatesGroup):
     confirm = State()
 
 
-# ❌ ОТМЕНА (ОДИН РАЗ!)
+# ❌ ОТМЕНА
 @dp.message_handler(lambda message: message.text == "❌ Отмена", state="*")
 async def cancel(msg: types.Message, state: FSMContext):
+
     await state.finish()
 
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     kb.add("🪡 Пирсинг", "🎨 Тату")
 
-    await msg.answer("❌ Отменено", reply_markup=kb)
+    await msg.answer(
+    "❌ Отменено",
+    reply_markup=kb
+    )
+
     await Form.master.set()
 
 
 # ▶️ СТАРТ
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
-    kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.add("🪡 Пирсинг", "🎨 Тату")
-    kb.add("❌ Отмена")
 
-    await msg.answer("Выберите мастера:", reply_markup=kb)
-    await Form.master.set()
+kb = ReplyKeyboardMarkup(resize_keyboard=True)
+kb.add("🪡 Пирсинг", "🎨 Тату")
+kb.add("❌ Отмена")
+
+await msg.answer(
+"Выберите мастера:",
+reply_markup=kb
+)
+
+await Form.master.set()
 
 
 # 👤 ВЫБОР МАСТЕРА
 @dp.message_handler(state=Form.master)
 async def choose_master(msg: types.Message, state: FSMContext):
+
     await state.update_data(master=msg.text)
 
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     kb.add("Да", "Нет")
     kb.add("❌ Отмена")
 
-    await msg.answer("Была услуга?", reply_markup=kb)
-    await Form.has_service.set()
+    await msg.answer(
+    "Была услуга?",
+    reply_markup=kb
+    )
+
+await Form.has_service.set()
 
 
 # 💉 УСЛУГА
 @dp.message_handler(state=Form.has_service)
 async def has_service(msg: types.Message, state: FSMContext):
-    if msg.text == "Да":
+
+     if msg.text == "Да":
+
         await state.update_data(has_service=True)
-        await msg.answer("Введите сумму услуги:", reply_markup=ReplyKeyboardRemove())
+
+        await msg.answer(
+            "Введите сумму услуги:",
+            reply_markup=ReplyKeyboardRemove()
+        )
+
         await Form.service_amount.set()
+
     else:
+
         await state.update_data(has_service=False)
+
         await ask_cream(msg)
 
 
 # 💰 СУММА
 @dp.message_handler(state=Form.service_amount)
 async def service_amount(msg: types.Message, state: FSMContext):
+
     try:
         amount = float(msg.text)
+
     except:
         return await msg.answer("Введите число")
 
@@ -91,38 +117,51 @@ async def service_amount(msg: types.Message, state: FSMContext):
     kb.add("📲 Merchant")
     kb.add("❌ Отмена")
 
-    await msg.answer("Тип оплаты:", reply_markup=kb)
+    await msg.answer(
+        "Тип оплаты:",
+        reply_markup=kb
+    )
+
     await Form.service_payment.set()
 
 
 # 💳 ОПЛАТА УСЛУГИ
 @dp.message_handler(state=Form.service_payment)
 async def service_payment(msg: types.Message, state: FSMContext):
-    payment = (
-    msg.text
-    .replace("💵 ", "")
-    .replace("💳 ", "")
-    .replace("📲 ", "")
-)
 
-await state.update_data(service_payment=payment)
+    payment = (
+        msg.text
+        .replace("💵 ", "")
+        .replace("💳 ", "")
+        .replace("📲 ", "")
+    )
+
+    await state.update_data(service_payment=payment)
+
     await ask_cream(msg)
 
 
 # 🧴 СПРОСИТЬ ПРО КРЕМ
 async def ask_cream(msg):
+
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     kb.add("Да", "Нет")
     kb.add("❌ Отмена")
 
-    await msg.answer("Был крем?", reply_markup=kb)
+    await msg.answer(
+        "Был крем?",
+        reply_markup=kb
+    )
+
     await Form.has_cream.set()
 
 
 # 🧴 КРЕМ
 @dp.message_handler(state=Form.has_cream)
 async def has_cream(msg: types.Message, state: FSMContext):
+
     if msg.text == "Да":
+
         await state.update_data(has_cream=True)
 
         kb = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -130,29 +169,39 @@ async def has_cream(msg: types.Message, state: FSMContext):
         kb.add("📲 Merchant")
         kb.add("❌ Отмена")
 
-        await msg.answer("Крем = 10€\nТип оплаты:", reply_markup=kb)
+        await msg.answer(
+            "Крем = 10€\nТип оплаты:",
+            reply_markup=kb
+        )
+
         await Form.cream_payment.set()
+
     else:
+
         await state.update_data(has_cream=False)
+
         await finish(msg, state)
 
 
 # 💳 ОПЛАТА КРЕМА
 @dp.message_handler(state=Form.cream_payment)
 async def cream_payment(msg: types.Message, state: FSMContext):
-    payment = (
-    msg.text
-    .replace("💵 ", "")
-    .replace("💳 ", "")
-    .replace("📲 ", "")
-)
 
-await state.update_data(cream_payment=payment)
+    payment = (
+        msg.text
+        .replace("💵 ", "")
+        .replace("💳 ", "")
+        .replace("📲 ", "")
+    )
+
+    await state.update_data(cream_payment=payment)
+
     await finish(msg, state)
 
 
 # 🧠 ФИНАЛ
 async def finish(msg, state: FSMContext):
+
     data = await state.get_data()
 
     master = data["master"]
@@ -175,46 +224,60 @@ async def finish(msg, state: FSMContext):
 
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
 
-    # 👤 ТЕКСТ ДЛЯ МАСТЕРА (БЕЗ ПРОЦЕНТОВ)
-    text_user = f"📅 {now}\n👤 Мастер: {master}\n\n"
+# 👤 ТЕКСТ ДЛЯ МАСТЕРА
+text_user = f"📅 {now}\n👤 Мастер: {master}\n\n"
 
-    if has_service:
-        text_user += f"💉 Услуга:\n💰 {service_amount}\n"
-        if data['service_payment'] == 'Cash':
-           text_user += "💵 Cash\n"
-        elif data['service_payment'] == 'Merchant':
-             text_user += "📲 Merchant\n"
-        else:
-             text_user += "💳 Bank\n"
+if has_service:
 
-    if has_cream:
-        text_user += "\n🧴 Крем:\n💰 10\n"
-        if data['cream_payment'] == 'Cash':
-            text_user += "💵 Cash\n"
-        elif data['cream_payment'] == 'Merchant':
-               text_user += "📲 Merchant\n"
-        else:
-             text_user += "💳 Bank\n"
+    text_user += f"💉 Услуга:\n💰 {service_amount}\n"
 
-    # 📊 ТЕКСТ ДЛЯ ГРУППЫ (С ПРОЦЕНТАМИ)
-    text_group = f"{text_user}\n📊\n👤 Мастер: {round(master_income,2)}\n🏢 Компания: {round(company_total,2)}"
+    if data['service_payment'] == 'Cash':
+        text_user += "💵 Cash\n"
 
-    # сохраняем именно групповой текст
-    await state.update_data(final_text=text_group)
+    elif data['service_payment'] == 'Merchant':
+        text_user += "📲 Merchant\n"
 
-    await state.update_data(
-        text_user=text_user,
-        text_group=text_group
-    )
+    else:
+        text_user += "💳 Bank\n"
 
-    kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.add("✅ Да", "❌ Нет")
+if has_cream:
 
-    await msg.answer("📝 Оставить заметку?", reply_markup=kb)
+    text_user += "\n🧴 Крем:\n💰 10\n"
 
-    await Form.ask_note.set()
+    if data['cream_payment'] == 'Cash':
+        text_user += "💵 Cash\n"
+
+    elif data['cream_payment'] == 'Merchant':
+        text_user += "📲 Merchant\n"
+
+else:
+    text_user += "💳 Bank\n"
+
+# 📊 ТЕКСТ ДЛЯ ГРУППЫ
+text_group = (
+    f"{text_user}\n📊\n"
+    f"👤 Мастер: {round(master_income, 2)}\n"
+    f"🏢 Компания: {round(company_total, 2)}"
+)
+
+await state.update_data(
+    final_text=text_group,
+    text_user=text_user,
+    text_group=text_group
+)
+
+kb = ReplyKeyboardMarkup(resize_keyboard=True)
+kb.add("✅ Да", "❌ Нет")
+
+await msg.answer(
+    "📝 Оставить заметку?",
+    reply_markup=kb
+)
+
+await Form.ask_note.set()
 
 
+# 📝 СПРОСИТЬ ПРО ЗАМЕТКУ
 @dp.message_handler(state=Form.ask_note)
 async def ask_note_handler(msg: types.Message, state: FSMContext):
 
@@ -229,7 +292,7 @@ async def ask_note_handler(msg: types.Message, state: FSMContext):
 
         await Form.note.set()
 
-    else:
+else:
 
         kb = ReplyKeyboardMarkup(resize_keyboard=True)
         kb.add("✅ Да", "❌ Нет")
@@ -242,6 +305,7 @@ async def ask_note_handler(msg: types.Message, state: FSMContext):
         await Form.confirm.set()
 
 
+# 📝 ОБРАБОТКА ЗАМЕТКИ
 @dp.message_handler(state=Form.note)
 async def note_handler(msg: types.Message, state: FSMContext):
 
@@ -274,8 +338,11 @@ async def note_handler(msg: types.Message, state: FSMContext):
 # ✅ ПОДТВЕРЖДЕНИЕ
 @dp.message_handler(state=Form.confirm)
 async def confirm_handler(msg: types.Message, state: FSMContext):
+
     if "Да" in msg.text:
+
         data = await state.get_data()
+
         text = data.get("final_text")
 
         await bot.send_message(GROUP_ID, text)
@@ -283,16 +350,27 @@ async def confirm_handler(msg: types.Message, state: FSMContext):
         kb = ReplyKeyboardMarkup(resize_keyboard=True)
         kb.add("+ Новая запись")
 
-        await msg.answer("✅ Записано", reply_markup=ReplyKeyboardRemove())
-        await msg.answer("Начать заново?", reply_markup=kb)
+        await msg.answer(
+            "✅ Записано",
+            reply_markup=ReplyKeyboardRemove()
+        )
+
+        await msg.answer(
+            "Начать заново?",
+            reply_markup=kb
+        )
 
         await state.finish()
 
     else:
+
         kb = ReplyKeyboardMarkup(resize_keyboard=True)
         kb.add("+ Новая запись")
 
-        await msg.answer("❌ Отменено", reply_markup=kb)
+        await msg.answer(
+            "❌ Отменено",
+            reply_markup=kb
+        )
 
         await state.finish()
 
@@ -300,10 +378,15 @@ async def confirm_handler(msg: types.Message, state: FSMContext):
 # ➕ НОВАЯ ЗАПИСЬ
 @dp.message_handler(lambda message: "Новая запись" in message.text)
 async def new_entry(msg: types.Message, state: FSMContext):
+
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     kb.add("🪡 Пирсинг", "🎨 Тату")
 
-    await msg.answer("Выберите мастера:", reply_markup=kb)
+    await msg.answer(
+        "Выберите мастера:",
+        reply_markup=kb
+    )
+
     await Form.master.set()
 
 
