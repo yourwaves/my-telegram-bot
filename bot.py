@@ -370,7 +370,7 @@ async def confirm_handler(msg: types.Message, state: FSMContext):
         await msg.answer(
             "❌ Отменено",
             reply_markup=kb
-        )await state.finish()
+        await state.finish()
 
 
 # ➕ НОВАЯ ЗАПИСЬ
