@@ -185,7 +185,9 @@ async def has_cream(msg: types.Message, state: FSMContext):
 
 # 💳 ОПЛАТА КРЕМА
 @dp.message_handler(state=Form.cream_payment)
-async def cream_payment(msg: types.Message, state: FSMContext):payment = (
+async def cream_payment(msg: types.Message, state: FSMContext):
+    
+    payment = (
         msg.text
         .replace("💵 ", "")
         .replace("💳 ", "")
