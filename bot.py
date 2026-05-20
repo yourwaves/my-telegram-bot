@@ -391,5 +391,5 @@ async def new_entry(msg: types.Message, state: FSMContext):
 
 
 # 🚀 ЗАПУСК
-if name == "__main__":
+if __name__ == "__main__":
     executor.start_polling(dp)
