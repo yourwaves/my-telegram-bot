@@ -16,15 +16,15 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 class Form(StatesGroup):
-master = State()
-has_service = State()
-service_amount = State()
-service_payment = State()
-has_cream = State()
-cream_payment = State()
-ask_note = State()
-note = State()
-confirm = State()
+  master = State()
+  has_service = State()
+  service_amount = State()
+  service_payment = State()
+  has_cream = State()
+  cream_payment = State()
+  ask_note = State()
+  note = State()
+  confirm = State()
 
 
 # ❌ ОТМЕНА
